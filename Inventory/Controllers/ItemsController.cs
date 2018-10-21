@@ -111,8 +111,33 @@ namespace Inventory.Controllers
         }
 
         // PUT: api/Items/5
-        public void Put(int id, [FromBody]string value)
+        public void Put(int label, [FromBody]Item item)
         {
+            Item updateItem= items.Where(x => x.Label == label).FirstOrDefault();
+            string oldRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
+            string newRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
+            bool changed = false;
+            //only used to modify isExpired currently but could be used for different put requests with validation
+            //you can't unexpire an item
+            if (!updateItem.IsExpired && item.IsExpired)
+            {
+                updateItem.IsExpired = item.IsExpired;
+                newRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
+                changed = true;
+                //notify
+            }
+            if (changed)
+            {
+                items.Remove(items.Where(x => x.Label == label).FirstOrDefault());
+                items.Add(updateItem);
+                txtData.Remove(oldRow);
+                txtData.Add(newRow);
+                File.WriteAllLines(dataPath, txtData);
+            }
+            
+
+
+
         }
 
         // DELETE: api/Items/5
