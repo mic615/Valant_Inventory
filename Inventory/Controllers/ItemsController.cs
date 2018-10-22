@@ -6,6 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using log4net;
+using log4net.Config;
 using System.Runtime.Serialization.Json;
 
 
@@ -17,7 +19,8 @@ namespace Inventory.Controllers
         private List<string> txtData = new List<string>();
         private string dataPath;
         private int currentLabel = 0;
-
+       // private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+       
         public ItemsController()
         {          
             //establish some form of storage using file I/O to save data state
@@ -44,7 +47,9 @@ namespace Inventory.Controllers
                         catch (Exception e)
                         {
                             //TODO log bad data error
-                            Console.Write(e);
+                            System.Diagnostics.Debug.WriteLine(e);
+                          // log.Error("there is bad data. stack trace:");
+                          // log.Error(e);
                             continue;
                         }
 
@@ -81,20 +86,20 @@ namespace Inventory.Controllers
         }
 
         // GET: api/Items
-        public List<Item> Get()
+        public List<Item> GetItems()
         {
             return items;
         }
 
         // GET: api/Items/5
-        public Item Get(int label)
+        public Item GetItem(int label)
         {
             Item item = items.Where(x => x.Label == label).FirstOrDefault();
             return item;
         }
 
         // POST: api/Items
-        public string Post(Item item)
+        public string PostItem(Item item)
         {
             string responseMessage = "";
             //vaidate input for minimum requirements
@@ -119,11 +124,13 @@ namespace Inventory.Controllers
             {
                 responseMessage = "Please specify the item's type ";
             }
+           // log.Info(responseMessage);
+            System.Diagnostics.Debug.WriteLine(responseMessage);
             return (responseMessage);
         }
 
         // PUT: api/Items/5
-        public String Put(int label, [FromBody]Item item)
+        public String PutItem(int label, [FromBody]Item item)
         {
             string responseMessage = "";
             Item updateItem= items.Where(x => x.Label == label).FirstOrDefault();
@@ -141,6 +148,11 @@ namespace Inventory.Controllers
                 responseMessage = "Item " + updateItem.Label.ToString()
                 + " of type " + updateItem.Type + " is now expired!";
             }
+            else
+            {
+                responseMessage = "cannot unexpire Item " + updateItem.Label.ToString()
+                + " of type " + updateItem.Type ;
+            }
             if (changed)
             {
                 items.Remove(items.Where(x => x.Label == label).FirstOrDefault());
@@ -149,11 +161,13 @@ namespace Inventory.Controllers
                 txtData.Add(newRow);
                 File.WriteAllLines(dataPath, txtData);
             }
+            System.Diagnostics.Debug.WriteLine(responseMessage);
+           // log.Info(responseMessage);
             return (responseMessage);
         }
 
         // DELETE: api/Items/5
-        public String Delete(int label)
+        public String DeleteItem(int label)
         {
             Item item = items.Where(x => x.Label == label).FirstOrDefault();
             items.Remove(item);
@@ -163,6 +177,8 @@ namespace Inventory.Controllers
             File.WriteAllLines(dataPath, txtData);
             string responseMessage = "Item " + item.Label.ToString() 
                 + " of type " + item.Type + " was removed from the inventory!";
+            System.Diagnostics.Debug.WriteLine(responseMessage);
+           // log.Info(responseMessage);
             return (responseMessage);
         }
     }
