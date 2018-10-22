@@ -19,7 +19,7 @@ namespace Inventory.Controllers
         private int currentLabel = 0;
 
         public ItemsController()
-        {          
+        {
             //establish some form of storage using file I/O to save data state
             string commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             dataPath = commonAppData + "\\Invetory.txt";
@@ -32,7 +32,7 @@ namespace Inventory.Controllers
                     string[] properties = row.Split(',');
                     Item newItem = new Item();
                     //parse row to Item
-                    if(properties.Length == 3)
+                    if (properties.Length == 3)
                     {
                         //Label
                         try
@@ -66,7 +66,7 @@ namespace Inventory.Controllers
                                 break;
 
                         }
-                        
+
                     }
                     //add Item to list  
                     items.Add(newItem);
@@ -74,10 +74,10 @@ namespace Inventory.Controllers
             }
             else
             {
-                File.Create(dataPath);           
-            }           
-            
-    
+                File.Create(dataPath);
+            }
+
+
         }
 
         // GET: api/Items
@@ -102,7 +102,7 @@ namespace Inventory.Controllers
 
             items.Add(item);
             //fill string for txt file update
-            string row= item.Label.ToString() +","+ item.Type+","+ item.IsExpired.ToString();
+            string row = item.Label.ToString() + "," + item.Type + "," + item.IsExpired.ToString();
             //update current label to simulate auto increment from a DB
             currentLabel = currentLabel++;
             txtData.Add(row);
@@ -111,9 +111,10 @@ namespace Inventory.Controllers
         }
 
         // PUT: api/Items/5
-        public void Put(int label, [FromBody]Item item)
+        public String Put(int label, [FromBody]Item item)
         {
-            Item updateItem= items.Where(x => x.Label == label).FirstOrDefault();
+            string responseMessage = "";
+            Item updateItem = items.Where(x => x.Label == label).FirstOrDefault();
             string oldRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
             string newRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
             bool changed = false;
@@ -125,6 +126,8 @@ namespace Inventory.Controllers
                 newRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
                 changed = true;
                 //notify
+                responseMessage = "Item " + updateItem.Label.ToString()
+                + " of type " + updateItem.Type + " is now expired! /n :)";
             }
             if (changed)
             {
@@ -134,11 +137,11 @@ namespace Inventory.Controllers
                 txtData.Add(newRow);
                 File.WriteAllLines(dataPath, txtData);
             }
-       
+            return (responseMessage);
         }
 
         // DELETE: api/Items/5
-        public void Delete(int label)
+        public String Delete(int label)
         {
             Item item = items.Where(x => x.Label == label).FirstOrDefault();
             items.Remove(item);
@@ -146,6 +149,9 @@ namespace Inventory.Controllers
             //update txt storage
             txtData.Remove(row);
             File.WriteAllLines(dataPath, txtData);
+            string responseMessage = "Item " + item.Label.ToString()
+                + " of type " + item.Type + " was removed from the inventory!";
+            return (responseMessage);
         }
     }
 }
