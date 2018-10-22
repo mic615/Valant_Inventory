@@ -134,10 +134,7 @@ namespace Inventory.Controllers
                 txtData.Add(newRow);
                 File.WriteAllLines(dataPath, txtData);
             }
-            
-
-
-
+       
         }
 
         // DELETE: api/Items/5
