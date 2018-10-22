@@ -19,7 +19,7 @@ namespace Inventory.Controllers
         private int currentLabel = 0;
 
         public ItemsController()
-        {
+        {          
             //establish some form of storage using file I/O to save data state
             string commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             dataPath = commonAppData + "\\Invetory.txt";
@@ -32,7 +32,7 @@ namespace Inventory.Controllers
                     string[] properties = row.Split(',');
                     Item newItem = new Item();
                     //parse row to Item
-                    if (properties.Length == 3)
+                    if(properties.Length == 3)
                     {
                         //Label
                         try
@@ -45,7 +45,7 @@ namespace Inventory.Controllers
                         {
                             //TODO log bad data error
                             Console.Write(e);
-                            break;
+                            continue;
                         }
 
                         //Type
@@ -66,7 +66,7 @@ namespace Inventory.Controllers
                                 break;
 
                         }
-
+                        
                     }
                     //add Item to list  
                     items.Add(newItem);
@@ -74,10 +74,10 @@ namespace Inventory.Controllers
             }
             else
             {
-                File.Create(dataPath);
-            }
-
-
+                File.Create(dataPath);           
+            }           
+            
+    
         }
 
         // GET: api/Items
@@ -94,27 +94,39 @@ namespace Inventory.Controllers
         }
 
         // POST: api/Items
-        public void Post(Item item)
+        public string Post(Item item)
         {
-            //add to list
-            //autoincrement ID
-            item.Label = currentLabel + 1;
+            string responseMessage = "";
+            //vaidate input for minimum requirements
+            if (item.Type != "")
+            {
+                //add to list
+                //autoincrement ID
+                item.Label = currentLabel + 1;
 
-            items.Add(item);
-            //fill string for txt file update
-            string row = item.Label.ToString() + "," + item.Type + "," + item.IsExpired.ToString();
-            //update current label to simulate auto increment from a DB
-            currentLabel = currentLabel++;
-            txtData.Add(row);
+                items.Add(item);
+                //fill string for txt file update
+                string row = item.Label.ToString() + "," + item.Type + "," + item.IsExpired.ToString();
+                //update current label to simulate auto increment from a DB
+                currentLabel = currentLabel++;
+                txtData.Add(row);
 
-            File.WriteAllLines(dataPath, txtData);
+                File.WriteAllLines(dataPath, txtData);
+                responseMessage="Item " + item.Label.ToString()
+                + " of type " + item.Type + " has been added to the inventory";
+            }
+            else
+            {
+                responseMessage = "Please specify the item's type ";
+            }
+            return (responseMessage);
         }
 
         // PUT: api/Items/5
         public String Put(int label, [FromBody]Item item)
         {
             string responseMessage = "";
-            Item updateItem = items.Where(x => x.Label == label).FirstOrDefault();
+            Item updateItem= items.Where(x => x.Label == label).FirstOrDefault();
             string oldRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
             string newRow = updateItem.Label.ToString() + "," + updateItem.Type + "," + updateItem.IsExpired.ToString();
             bool changed = false;
@@ -127,7 +139,7 @@ namespace Inventory.Controllers
                 changed = true;
                 //notify
                 responseMessage = "Item " + updateItem.Label.ToString()
-                + " of type " + updateItem.Type + " is now expired! /n :)";
+                + " of type " + updateItem.Type + " is now expired!";
             }
             if (changed)
             {
@@ -149,7 +161,7 @@ namespace Inventory.Controllers
             //update txt storage
             txtData.Remove(row);
             File.WriteAllLines(dataPath, txtData);
-            string responseMessage = "Item " + item.Label.ToString()
+            string responseMessage = "Item " + item.Label.ToString() 
                 + " of type " + item.Type + " was removed from the inventory!";
             return (responseMessage);
         }
