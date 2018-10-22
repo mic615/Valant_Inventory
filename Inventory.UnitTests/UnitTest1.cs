@@ -55,55 +55,7 @@ namespace Inventory.UnitTests
             Assert.IsTrue(result.Contains("Please specify the item's type "));
 
         }
-
-        [TestMethod]
-        public void DeleteGoodItem_ShouldReturnConfirmation()
-        {
-            var controller = new ItemsController();
-            Item item = new Item();
-            item.Type = "Bannana";
-
-            controller.PostItem(item);
-            string result = controller.DeleteItem(controller.GetItems().Count);
-            Assert.IsNotNull(result);
-
-            Assert.IsTrue(result.Contains("removed from the inventory!"));
-
-        }
-        [TestMethod]
-        public void ExpireItem_ShouldReturnConfirmation()
-        {
-            var controller = new ItemsController();
-            Item item = new Item();
-            item.Type = "Bannana";
-
-            controller.PostItem(item);
-            item.IsExpired = true;
-            string result = controller.PutItem(controller.GetItems().Count, item);
-            Assert.IsNotNull(result);
-
-            Assert.IsTrue(result.Contains("is now expired!"));
-
-        }
-
-        [TestMethod]
-        public void UnexpireItem_ShouldReturnError()
-        {
-            var controller = new ItemsController();
-            Item item = new Item();
-            item.Type = "Bannana";
-            //make item
-            controller.PostItem(item);
-            item.IsExpired = true;
-            //expire item
-            controller.PutItem(controller.GetItems().Count, item);
-            item.IsExpired = false;
-            string result = controller.PutItem(controller.GetItems().Count, item);
-            Assert.IsNotNull(result);
-
-            Assert.IsTrue(result.Contains("cannot unexpire Item "));
-
-        }
+      
 
 
     }
